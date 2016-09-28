@@ -511,6 +511,11 @@ var CA;
             Canvas.prototype.getPxHeight = function (width) {
                 return this.canvas.height;
             };
+            Canvas.prototype.reset = function () {
+                this.canvas.width = this.parent.offsetWidth;
+                this.canvas.height = this.parent.offsetHeight;
+                this.fireEvent('canvas-size-changed');
+            };
             Canvas.prototype.clear = function () {
                 this.context.save();
                 this.context.fillStyle = '#fff';
@@ -520,7 +525,7 @@ var CA;
             Canvas.prototype.updateHeight = function () {
                 var data = this.canvas.toDataURL();
                 this.clear();
-                this.canvas.height += 100;
+                this.canvas.height += this.parent.offsetHeight;
                 var image = new Image();
                 image.src = data;
                 this.context.drawImage(image, 0, 0);
@@ -553,9 +558,11 @@ var CA;
                 this.canvas = new Renderer_1.Canvas(this.target);
                 // scroll canvas
                 var self = this;
-                this.target.addEventListener('wheel', function (e) {
-                    self.target.scrollTop += e.deltaY / 2;
-                    self.target.scrollLeft += e.deltaX / 2;
+                var updateScrollbarPosition = function (e) {
+                    if (e) {
+                        self.target.scrollTop += e.deltaY / 2;
+                        self.target.scrollLeft += e.deltaX / 2;
+                    }
                     var verticalRatio = self.target.scrollTop / (self.target.scrollHeight - self.target.offsetHeight);
                     var verticalTop = (self.target.offsetHeight - 5 - 5 - 50) * verticalRatio;
                     var horizontalRatio = self.target.scrollLeft / (self.target.scrollWidth - self.target.offsetWidth);
@@ -564,7 +571,8 @@ var CA;
                     scrollVertical.style.right = (5 - self.target.scrollLeft) + "px";
                     scrollHorizontal.style.top = (self.target.scrollTop + self.target.offsetHeight - 10) + "px";
                     scrollHorizontal.style.left = (self.target.scrollLeft + 5 + horizontalLeft) + "px";
-                });
+                };
+                this.target.addEventListener('wheel', updateScrollbarPosition);
                 // visibility of scrollbars
                 var updateScollbarVisibility = function () {
                     var horizontal = self.target.scrollWidth > self.target.offsetWidth;
@@ -577,6 +585,7 @@ var CA;
                         scrollHorizontal.style.display = '';
                     else
                         scrollHorizontal.style.display = 'none';
+                    updateScrollbarPosition();
                 };
                 updateScollbarVisibility();
                 this.canvas.registerEventListener('canvas-size-changed', updateScollbarVisibility);
@@ -591,10 +600,10 @@ var CA;
             Renderer.prototype.reset = function () { };
             Renderer.prototype.startAutomata = function () {
                 window.clearTimeout(this.timer);
-                this.canvas.clear();
+                this.canvas.reset();
                 this.canvas.setCellSize(1);
-                // this.canvas.setWidth(9);
                 var dataLength = this.canvas.setMaxDataWidth();
+                this.canvas.setWidth(dataLength);
                 var limit = this.canvas.getHeight() - 1;
                 var self = this;
                 var rule = new CA.Rule(this.rule.getDecimal());

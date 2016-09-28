@@ -64,6 +64,12 @@ namespace CA.Renderer {
             return this.canvas.height;
         }
 
+        public reset (): void {
+            this.canvas.width = this.parent.offsetWidth;
+            this.canvas.height = this.parent.offsetHeight;
+            this.fireEvent('canvas-size-changed');
+        }
+
         public clear (): void {
             this.context.save();
             this.context.fillStyle = '#fff';
@@ -74,7 +80,7 @@ namespace CA.Renderer {
         private updateHeight (): void {
             let data = this.canvas.toDataURL();
             this.clear();
-            this.canvas.height += 100;
+            this.canvas.height += this.parent.offsetHeight;
 
             let image = new Image();
             image.src = data;

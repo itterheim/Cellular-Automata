@@ -17,15 +17,15 @@ namespace CA.Renderer {
 
         public oneDimensionalAutomata: Automata.OneDimensional;
         private timer: number;
+
         public startAutomata (): void {
             window.clearTimeout(this.timer);
-            this.canvas.clear();
+            this.canvas.reset();
 
             this.canvas.setCellSize(1);
-            // this.canvas.setWidth(9);
             let dataLength = this.canvas.setMaxDataWidth();
+            this.canvas.setWidth(dataLength);
             let limit = this.canvas.getHeight() - 1;
-
 
             let self = this;
             let rule = new Rule(this.rule.getDecimal());
@@ -93,9 +93,11 @@ namespace CA.Renderer {
 
             // scroll canvas
             let self = this;
-            this.target.addEventListener('wheel', function (e: WheelEvent) {
-                self.target.scrollTop += e.deltaY / 2;
-                self.target.scrollLeft += e.deltaX / 2;
+            let updateScrollbarPosition = function (e?: WheelEvent) {
+                if (e) {
+                    self.target.scrollTop += e.deltaY / 2;
+                    self.target.scrollLeft += e.deltaX / 2;
+                }
 
                 let verticalRatio = self.target.scrollTop / (self.target.scrollHeight - self.target.offsetHeight);
                 let verticalTop = (self.target.offsetHeight - 5 - 5 - 50) * verticalRatio;
@@ -108,7 +110,8 @@ namespace CA.Renderer {
 
                 scrollHorizontal.style.top = `${(self.target.scrollTop + self.target.offsetHeight - 10)}px`;
                 scrollHorizontal.style.left = `${(self.target.scrollLeft + 5 + horizontalLeft)}px`;
-            });
+            };
+            this.target.addEventListener('wheel', updateScrollbarPosition);
 
             // visibility of scrollbars
             let updateScollbarVisibility = function () {
@@ -118,6 +121,7 @@ namespace CA.Renderer {
                 else scrollVertical.style.display = 'none';
                 if (horizontal) scrollHorizontal.style.display = '';
                 else scrollHorizontal.style.display = 'none';
+                updateScrollbarPosition();
             };
             updateScollbarVisibility();
             this.canvas.registerEventListener('canvas-size-changed', updateScollbarVisibility);
