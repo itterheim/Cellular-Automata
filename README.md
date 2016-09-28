@@ -1,4 +1,4 @@
 # Cellular Automata
 
 Preview:
-https://itterheim.github.io/cellular-automata/
+https://itterheim.github.io/Cellular-Automata/
