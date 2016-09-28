@@ -67,15 +67,23 @@ var CA;
     var Rule = (function () {
         function Rule(n) {
             if (n === void 0) { n = 0; }
+            this.conditions = [];
             this.setDecimal(n);
         }
+        Rule.prototype.isActive = function (value) {
+            if (typeof this.conditions[value] === 'undefined')
+                return false;
+            return this.conditions[value];
+        };
         Rule.prototype.setDecimal = function (n) {
             this.decimal = n;
             this.binary = this.fixBinaryLength(this.decimal.toString(2));
+            this.updateConditions();
         };
         Rule.prototype.setBinary = function (s) {
             this.binary = this.fixBinaryLength(s);
             this.decimal = parseInt(this.binary, 2);
+            this.updateConditions();
         };
         Rule.prototype.getDecimal = function () {
             return this.decimal;
@@ -94,9 +102,91 @@ var CA;
             }
             return s;
         };
+        Rule.prototype.updateConditions = function () {
+            if (!this.binary || this.binary.length !== 8)
+                return;
+            for (var i = 0; i < this.binary.length; i++) {
+                this.conditions[this.binary.length - i - 1] = this.binary[i] === '1';
+            }
+        };
         return Rule;
     }());
     CA.Rule = Rule;
+})(CA || (CA = {}));
+
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var CA;
+(function (CA) {
+    var Automata;
+    (function (Automata) {
+        var OneDimensional = (function (_super) {
+            __extends(OneDimensional, _super);
+            function OneDimensional() {
+                _super.call(this);
+                this.data = [];
+            }
+            OneDimensional.prototype.setRule = function (rule) {
+                this.rule = rule;
+            };
+            OneDimensional.prototype.start = function (data) {
+                this.data = [];
+                var generation = new OneDimensionalData(0, data);
+                this.data.push(generation);
+                this.fireEvent('new-generation', generation);
+            };
+            OneDimensional.prototype.nextGeneration = function () {
+                if (this.data.length === 0)
+                    return;
+                var previousGeneration = this.data[this.data.length - 1];
+                var data = this.evolve(previousGeneration.data);
+                var generation = new OneDimensionalData(previousGeneration.generation + 1, data);
+                this.data.push(generation);
+                this.fireEvent('new-generation', generation);
+                return generation;
+            };
+            OneDimensional.prototype.evolve = function (data) {
+                var evolved = '';
+                for (var i = 0; i < data.length; i++) {
+                    // evolved += data[i] === '1' ? '0' : '1';
+                    var value = this.getValue(data, i);
+                    evolved += this.rule.isActive(value) ? '1' : '0';
+                }
+                return evolved;
+            };
+            OneDimensional.prototype.getValue = function (data, position) {
+                try {
+                    var binary = "" + this.getCharacter(data, position - 1) + this.getCharacter(data, position) + this.getCharacter(data, position + 1);
+                    return parseInt(binary, 2);
+                }
+                catch (error) {
+                    console.error('error', error);
+                    return 0;
+                }
+            };
+            OneDimensional.prototype.getCharacter = function (data, position) {
+                if (position < 0)
+                    return this.getCharacter(data, data.length + position);
+                if (position >= data.length)
+                    return this.getCharacter(data, position - data.length);
+                return data[position];
+            };
+            ;
+            return OneDimensional;
+        }(CA.EventCreator));
+        Automata.OneDimensional = OneDimensional;
+        var OneDimensionalData = (function () {
+            function OneDimensionalData(generation, data) {
+                this.generation = generation;
+                this.data = data;
+            }
+            return OneDimensionalData;
+        }());
+        Automata.OneDimensionalData = OneDimensionalData;
+    })(Automata = CA.Automata || (CA.Automata = {}));
 })(CA || (CA = {}));
 
 var __extends = (this && this.__extends) || function (d, b) {
@@ -489,7 +579,8 @@ var CA;
                 };
                 updateScollbarVisibility();
                 this.canvas.registerEventListener('canvas-size-changed', updateScollbarVisibility);
-                this.test();
+                // this.test();
+                this.startAutomata();
             }
             Renderer.prototype.setRule = function (rule) {
                 this.rule = rule;
@@ -497,6 +588,29 @@ var CA;
             Renderer.prototype.start = function () { };
             Renderer.prototype.stop = function () { };
             Renderer.prototype.reset = function () { };
+            Renderer.prototype.startAutomata = function () {
+                this.canvas.setCellSize(1);
+                // this.canvas.setWidth(9);
+                var dataLength = this.canvas.setMaxDataWidth();
+                var limit = this.canvas.getHeight() - 1;
+                var self = this;
+                this.oneDimensionalAutomata = new CA.Automata.OneDimensional();
+                this.oneDimensionalAutomata.setRule(this.rule);
+                this.oneDimensionalAutomata.registerEventListener('new-generation', function (data) {
+                    self.canvas.drawBinaryLine(data.generation, data.data);
+                    if (data.generation < limit) {
+                        window.setTimeout(function () {
+                            self.oneDimensionalAutomata.nextGeneration();
+                        }, 0);
+                    }
+                });
+                var initialData = [];
+                for (var i = 0; i < dataLength; i++) {
+                    initialData.push(0);
+                }
+                initialData[Math.floor(initialData.length / 2)] = 1;
+                this.oneDimensionalAutomata.start(initialData.join(''));
+            };
             Renderer.prototype.test = function () {
                 this.canvas.setCellSize(10);
                 var self = this;

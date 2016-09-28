@@ -15,6 +15,33 @@ namespace CA.Renderer {
         public stop (): void { }
         public reset (): void { }
 
+        public oneDimensionalAutomata: Automata.OneDimensional;
+        public startAutomata (): void {
+            this.canvas.setCellSize(1);
+            // this.canvas.setWidth(9);
+            let dataLength = this.canvas.setMaxDataWidth();
+            let limit = this.canvas.getHeight() - 1;
+
+            let self = this;
+            this.oneDimensionalAutomata = new Automata.OneDimensional();
+            this.oneDimensionalAutomata.setRule(this.rule);
+            this.oneDimensionalAutomata.registerEventListener('new-generation', function (data: Automata.OneDimensionalData) {
+                self.canvas.drawBinaryLine(data.generation, data.data);
+                if (data.generation < limit) {
+                    window.setTimeout(function () {
+                        self.oneDimensionalAutomata.nextGeneration();
+                    }, 0);
+                }
+            });
+
+            let initialData = [];
+            for (let i = 0; i < dataLength; i++) {
+                initialData.push(0);
+            }
+            initialData[Math.floor(initialData.length / 2)] = 1;
+            this.oneDimensionalAutomata.start(initialData.join(''));
+        }
+
         public test (): void {
             this.canvas.setCellSize(10);
             let self = this;
@@ -89,7 +116,8 @@ namespace CA.Renderer {
             updateScollbarVisibility();
             this.canvas.registerEventListener('canvas-size-changed', updateScollbarVisibility);
 
-            this.test();
+            // this.test();
+            this.startAutomata();
         }
     }
 }
