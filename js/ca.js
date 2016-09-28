@@ -352,13 +352,21 @@ var CA;
     })(Controls = CA.Controls || (CA.Controls = {}));
 })(CA || (CA = {}));
 
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var CA;
 (function (CA) {
     var Renderer;
     (function (Renderer) {
-        var Canvas = (function () {
+        var Canvas = (function (_super) {
+            __extends(Canvas, _super);
             function Canvas(parent) {
+                _super.call(this);
                 this.cellSize = 10;
+                this.cellColor = '#04666b';
                 this.parent = parent;
                 this.canvas = document.createElement('canvas');
                 this.canvas.width = this.parent.offsetWidth;
@@ -366,33 +374,38 @@ var CA;
                 this.parent.appendChild(this.canvas);
                 this.context = this.canvas.getContext('2d');
             }
+            Canvas.prototype.drawBinaryCell = function (right, top, value) {
+                this.context.save();
+                this.context.fillStyle = value === '1' ? this.cellColor : '#fff';
+                this.context.fillRect(right, top, this.cellSize, this.cellSize);
+                this.context.restore();
+            };
+            Canvas.prototype.drawBinaryLine = function (line, binaryData) {
+                var top = line * this.cellSize;
+                if ((line * this.cellSize + this.cellSize) > this.canvas.height)
+                    this.updateHeight();
+                for (var i = 0; i < binaryData.length; i++) {
+                    this.drawBinaryCell(i * this.cellSize, top, binaryData[i]);
+                }
+            };
             Canvas.prototype.setCellSize = function (size) {
                 this.cellSize = size;
             };
             Canvas.prototype.getCellSize = function () {
                 return this.cellSize;
             };
-            Canvas.prototype.drawBinaryCell = function (right, top, value) {
-                this.context.save();
-                this.context.fillStyle = value === '1' ? '#000' : '#fff';
-                this.context.fillRect(right, top, this.cellSize, this.cellSize);
-                this.context.restore();
-            };
-            Canvas.prototype.drawBinaryLine = function (line, binaryData) {
-                var top = line * this.cellSize;
-                for (var i = 0; i < binaryData.length; i++) {
-                    this.drawBinaryCell(i * this.cellSize, top, binaryData[i]);
-                }
-            };
             Canvas.prototype.setWidth = function (width) {
                 this.canvas.width = width * this.cellSize;
+                this.fireEvent('canvas-size-changed');
             };
             Canvas.prototype.setPxWidth = function (width) {
                 this.canvas.width = width;
+                this.fireEvent('canvas-size-changed');
             };
             Canvas.prototype.setMaxDataWidth = function () {
                 var dataLength = Math.floor(this.parent.offsetWidth / this.cellSize);
                 this.canvas.width = dataLength * this.cellSize;
+                this.fireEvent('canvas-size-changed');
                 return dataLength;
             };
             Canvas.prototype.getWidth = function () {
@@ -413,8 +426,17 @@ var CA;
                 this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 this.context.restore();
             };
+            Canvas.prototype.updateHeight = function () {
+                var data = this.canvas.toDataURL();
+                this.clear();
+                this.canvas.height += 100;
+                var image = new Image();
+                image.src = data;
+                this.context.drawImage(image, 0, 0);
+                this.fireEvent('canvas-size-changed');
+            };
             return Canvas;
-        }());
+        }(CA.EventCreator));
         Renderer.Canvas = Canvas;
     })(Renderer = CA.Renderer || (CA.Renderer = {}));
 })(CA || (CA = {}));
@@ -430,18 +452,44 @@ var CA;
                 this.target = document.createElement('div');
                 this.parent.appendChild(this.target);
                 this.target.id = 'ca-renderer';
+                // scrollbars
+                var scrollHorizontal = document.createElement('div');
+                scrollHorizontal.id = 'ca-scroll-horizontal';
+                this.target.appendChild(scrollHorizontal);
+                var scrollVertical = document.createElement('div');
+                scrollVertical.id = 'ca-scroll-vertical';
+                this.target.appendChild(scrollVertical);
                 this.canvas = new Renderer_1.Canvas(this.target);
-                // test
-                this.canvas.setCellSize(1);
-                var dataLength = this.canvas.setMaxDataWidth();
-                var rows = this.canvas.getHeight();
-                for (var i = 0; i < rows; i++) {
-                    var binaryData = '';
-                    for (var j = 0; j < dataLength; j++) {
-                        binaryData += Math.floor(Math.random() * 2);
-                    }
-                    this.canvas.drawBinaryLine(i, binaryData);
-                }
+                // scroll canvas
+                var self = this;
+                this.target.addEventListener('wheel', function (e) {
+                    self.target.scrollTop += e.deltaY / 2;
+                    self.target.scrollLeft += e.deltaX / 2;
+                    var verticalRatio = self.target.scrollTop / (self.target.scrollHeight - self.target.offsetHeight);
+                    var verticalTop = (self.target.offsetHeight - 5 - 5 - 50) * verticalRatio;
+                    var horizontalRatio = self.target.scrollLeft / (self.target.scrollWidth - self.target.offsetWidth);
+                    var horizontalLeft = (self.target.offsetWidth - 5 - 5 - 50) * horizontalRatio;
+                    scrollVertical.style.top = (self.target.scrollTop + 5 + verticalTop) + "px";
+                    scrollVertical.style.right = (5 - self.target.scrollLeft) + "px";
+                    scrollHorizontal.style.top = (self.target.scrollTop + self.target.offsetHeight - 10) + "px";
+                    scrollHorizontal.style.left = (self.target.scrollLeft + 5 + horizontalLeft) + "px";
+                });
+                // visibility of scrollbars
+                var updateScollbarVisibility = function () {
+                    var horizontal = self.target.scrollWidth > self.target.offsetWidth;
+                    var vertical = self.target.scrollHeight > self.target.offsetHeight;
+                    if (vertical)
+                        scrollVertical.style.display = '';
+                    else
+                        scrollVertical.style.display = 'none';
+                    if (horizontal)
+                        scrollHorizontal.style.display = '';
+                    else
+                        scrollHorizontal.style.display = 'none';
+                };
+                updateScollbarVisibility();
+                this.canvas.registerEventListener('canvas-size-changed', updateScollbarVisibility);
+                this.test();
             }
             Renderer.prototype.setRule = function (rule) {
                 this.rule = rule;
@@ -449,6 +497,26 @@ var CA;
             Renderer.prototype.start = function () { };
             Renderer.prototype.stop = function () { };
             Renderer.prototype.reset = function () { };
+            Renderer.prototype.test = function () {
+                this.canvas.setCellSize(10);
+                var self = this;
+                var dataLength = this.canvas.setMaxDataWidth();
+                var i = 0;
+                var timer;
+                var createData = function () {
+                    var binaryData = '';
+                    for (var j = 0; j < dataLength; j++) {
+                        binaryData += Math.floor(Math.random() * 2);
+                    }
+                    self.canvas.drawBinaryLine(i, binaryData);
+                    if (i * self.canvas.getCellSize() > self.target.offsetHeight * 1.2) {
+                        window.clearInterval(timer);
+                        return;
+                    }
+                    i++;
+                };
+                timer = window.setInterval(createData, 100);
+            };
             return Renderer;
         }());
         Renderer_1.Renderer = Renderer;

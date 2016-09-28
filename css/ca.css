@@ -31,6 +31,10 @@ div#ca-control button.stopped:after { content: ''; position: absolute; top: 9px;
 div#ca-control button.playing:after { content: ''; position: absolute; top: 12px; left: 12px; width: 16px; height: 16px; background-color: #777; }
 
 div#ca-renderer {
-    position: absolute; top: 80px; bottom: 20px; left: 20px; right: 20px; background: #fff; overflow: hidden; text-align: center;
+    position: absolute; top: 80px; bottom: 20px; left: 20px; right: 20px; background: #fff; overflow: hidden; text-align: center; font-size: 0;
     box-shadow: 0 0 2px -1px #000;
 }
+div#ca-renderer div#ca-scroll-vertical,
+div#ca-renderer div#ca-scroll-horizontal { position: absolute; border-radius: 5px; box-shadow: 0 0 5px -1px #fff; background-color: rgba(0,0,0,0.6); }
+div#ca-renderer div#ca-scroll-vertical { width: 5px; height: 50px; top: 5px; right: 5px }
+div#ca-renderer div#ca-scroll-horizontal { width: 50px; height: 5px; bottom: 5px; left: 5px  }

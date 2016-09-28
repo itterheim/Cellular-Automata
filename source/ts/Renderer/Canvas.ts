@@ -1,11 +1,27 @@
 namespace CA.Renderer {
-    export class Canvas {
+    export class Canvas extends EventCreator {
         private parent: HTMLElement;
 
         private canvas: HTMLCanvasElement;
         private context: CanvasRenderingContext2D;
 
         private cellSize: number = 10;
+        private cellColor: string = '#04666b';
+
+        private drawBinaryCell (right, top, value: string): void {
+            this.context.save();
+            this.context.fillStyle = value === '1' ? this.cellColor : '#fff';
+            this.context.fillRect(right, top, this.cellSize, this.cellSize);
+            this.context.restore();
+        }
+
+        public drawBinaryLine (line: number, binaryData: string): void {
+            let top = line * this.cellSize;
+            if ((line * this.cellSize + this.cellSize) > this.canvas.height) this.updateHeight();
+            for (let i = 0; i < binaryData.length; i++) {
+                this.drawBinaryCell(i * this.cellSize, top, binaryData[i]);
+            }
+        }
 
         public setCellSize (size: number): void {
             this.cellSize = size;
@@ -15,31 +31,20 @@ namespace CA.Renderer {
             return this.cellSize;
         }
 
-        private drawBinaryCell (right, top, value: string): void {
-            this.context.save();
-            this.context.fillStyle = value === '1' ? '#000' : '#fff';
-            this.context.fillRect(right, top, this.cellSize, this.cellSize);
-            this.context.restore();
-        }
-
-        public drawBinaryLine (line: number, binaryData: string): void {
-            let top = line * this.cellSize;
-            for (let i = 0; i < binaryData.length; i++) {
-                this.drawBinaryCell(i * this.cellSize, top, binaryData[i]);
-            }
-        }
-
         public setWidth (width: number): void {
             this.canvas.width = width * this.cellSize;
+            this.fireEvent('canvas-size-changed');
         }
 
         public setPxWidth (width: number): void {
             this.canvas.width = width;
+            this.fireEvent('canvas-size-changed');
         }
 
         public setMaxDataWidth (): number {
             let dataLength = Math.floor(this.parent.offsetWidth / this.cellSize);
             this.canvas.width = dataLength * this.cellSize;
+            this.fireEvent('canvas-size-changed');
             return dataLength;
         }
 
@@ -66,7 +71,20 @@ namespace CA.Renderer {
             this.context.restore();
         }
 
+        private updateHeight (): void {
+            let data = this.canvas.toDataURL();
+            this.clear();
+            this.canvas.height += 100;
+
+            let image = new Image();
+            image.src = data;
+            this.context.drawImage(image, 0, 0);
+
+            this.fireEvent('canvas-size-changed');
+        }
+
         constructor (parent: HTMLElement) {
+            super();
             this.parent = parent;
 
             this.canvas = document.createElement('canvas');
