@@ -17,12 +17,6 @@ var CA;
             this.control.registerEventListener('start', function () {
                 self.renderer.startAutomata();
             });
-            // this.control.registerEventListener('stop', function () {
-            //     self.renderer.stop();
-            // });
-            // this.control.registerEventListener('reset', function () {
-            //     self.renderer.reset();
-            // });
         }
         App.prototype.run = function () {
         };
@@ -129,14 +123,28 @@ var CA;
                 _super.call(this);
                 this.data = [];
             }
-            OneDimensional.prototype.setRule = function (rule) {
-                this.rule = rule;
-            };
-            OneDimensional.prototype.start = function (data) {
+            OneDimensional.prototype.start = function (data, limit) {
+                if (limit === void 0) { limit = Infinity; }
                 this.data = [];
+                this.limit = limit;
                 var generation = new OneDimensionalData(0, data);
                 this.data.push(generation);
                 this.fireEvent('new-generation', generation);
+                var i = 0;
+                var self = this;
+                this.timer = window.setInterval(function (n) {
+                    if (i < self.limit)
+                        self.nextGeneration();
+                    else
+                        self.stop();
+                    i++;
+                }, 0);
+            };
+            OneDimensional.prototype.stop = function () {
+                window.clearInterval(this.timer);
+            };
+            OneDimensional.prototype.setRule = function (rule) {
+                this.rule = rule;
             };
             OneDimensional.prototype.nextGeneration = function () {
                 if (this.data.length === 0)
@@ -333,11 +341,8 @@ var CA;
                     self.binaryInput.setRule(self.rule);
                     self.fireEvent('rule-changed', self.rule);
                 });
-                this.runButton.registerEventListener('*', function (action) {
-                    if (action === 'play')
-                        self.fireEvent('start');
-                    else
-                        console.debug(action);
+                this.runButton.registerEventListener('click', function (action) {
+                    self.fireEvent('start');
                 });
                 this.binaryInput.setRule(this.rule);
                 this.decimalInput.setRule(this.rule);
@@ -420,21 +425,12 @@ var CA;
             __extends(RunButton, _super);
             function RunButton(parent) {
                 _super.call(this);
-                this.state = 'stopped';
                 this.parent = parent;
                 this.target = document.createElement('button');
-                this.target.className = this.state;
                 this.parent.appendChild(this.target);
                 var self = this;
                 this.target.addEventListener('click', function () {
-                    // if (self.state === 'stopped') {
-                    //     self.state = 'playing';
-                    self.fireEvent('play', 'play');
-                    // } else {
-                    //     self.state = 'stopped';
-                    //     self.fireEvent('stop', 'stop');
-                    // }
-                    self.target.className = self.state;
+                    self.fireEvent('click');
                 });
             }
             return RunButton;
@@ -595,34 +591,28 @@ var CA;
             Renderer.prototype.setRule = function (rule) {
                 this.rule = rule;
             };
-            Renderer.prototype.start = function () { };
-            Renderer.prototype.stop = function () { };
-            Renderer.prototype.reset = function () { };
             Renderer.prototype.startAutomata = function () {
-                window.clearTimeout(this.timer);
+                if (this.oneDimensionalAutomata)
+                    this.oneDimensionalAutomata.stop();
                 this.canvas.reset();
                 this.canvas.setCellSize(1);
                 var dataLength = this.canvas.setMaxDataWidth();
                 this.canvas.setWidth(dataLength);
-                var limit = this.canvas.getHeight() - 1;
+                // prepare data
                 var self = this;
                 var rule = new CA.Rule(this.rule.getDecimal());
-                this.oneDimensionalAutomata = new CA.Automata.OneDimensional();
-                this.oneDimensionalAutomata.setRule(rule);
-                this.oneDimensionalAutomata.registerEventListener('new-generation', function (data) {
-                    self.canvas.drawBinaryLine(data.generation, data.data);
-                    if (data.generation < limit) {
-                        self.timer = window.setTimeout(function () {
-                            self.oneDimensionalAutomata.nextGeneration();
-                        }, 0);
-                    }
-                });
                 var initialData = [];
                 for (var i = 0; i < dataLength; i++) {
                     initialData.push(0);
                 }
                 initialData[Math.floor(initialData.length / 2)] = 1;
-                this.oneDimensionalAutomata.start(initialData.join(''));
+                // Automata
+                this.oneDimensionalAutomata = new CA.Automata.OneDimensional();
+                this.oneDimensionalAutomata.setRule(rule);
+                this.oneDimensionalAutomata.registerEventListener('new-generation', function (data) {
+                    self.canvas.drawBinaryLine(data.generation, data.data);
+                });
+                this.oneDimensionalAutomata.start(initialData.join(''), this.canvas.getHeight() - 1);
             };
             Renderer.prototype.test = function () {
                 this.canvas.setCellSize(10);

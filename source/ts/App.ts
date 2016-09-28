@@ -22,12 +22,6 @@ namespace CA {
             this.control.registerEventListener('start', function () {
                 self.renderer.startAutomata();
             });
-            // this.control.registerEventListener('stop', function () {
-            //     self.renderer.stop();
-            // });
-            // this.control.registerEventListener('reset', function () {
-            //     self.renderer.reset();
-            // });
         }
 
         public run (): void {

@@ -3,15 +3,31 @@ namespace CA.Automata {
         private rule: Rule;
         private data: OneDimensionalData[] = [];
 
-        public setRule(rule: Rule): void {
-            this.rule = rule;
-        }
+        private limit: number;
+        private timer: number;
 
-        public start (data: string): void {
+        public start (data: string, limit: number = Infinity): void {
             this.data = [];
+            this.limit = limit;
             let generation = new OneDimensionalData(0, data);
             this.data.push(generation);
             this.fireEvent('new-generation', generation);
+
+            let i = 0;
+            let self = this;
+            this.timer = window.setInterval(function (n) {
+                if (i < self.limit) self.nextGeneration();
+                else self.stop();
+                i++;
+            }, 0);
+        }
+
+        public stop () {
+            window.clearInterval(this.timer);
+        }
+
+        public setRule(rule: Rule): void {
+            this.rule = rule;
         }
 
         public nextGeneration (): OneDimensionalData {

@@ -28,8 +28,7 @@ div#ca-control div.decimal input { display: inline-block; width: 60px; border: n
 div#ca-control div.decimal input:hover { border-bottom: 1px solid #3683da; }
 div#ca-control button { position: absolute; right: 0; top: 0; bottom: 0; width: 40px; border: none; background-color: #ddd; outline: none; cursor: pointer; }
 div#ca-control button:hover { background-color: #e2e2e2; }
-div#ca-control button.stopped:after { content: ''; position: absolute; top: 9px; left: 14px; border: 12px solid; border-color: transparent transparent transparent #777 }
-div#ca-control button.playing:after { content: ''; position: absolute; top: 12px; left: 12px; width: 16px; height: 16px; background-color: #777; }
+div#ca-control button:after { content: ''; position: absolute; top: 9px; left: 14px; border: 12px solid; border-color: transparent transparent transparent #777 }
 
 div#ca-renderer {
     position: absolute; top: 80px; bottom: 20px; left: 20px; right: 20px; background: #fff; overflow: hidden; text-align: center; font-size: 0;

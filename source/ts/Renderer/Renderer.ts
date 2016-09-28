@@ -4,48 +4,41 @@ namespace CA.Renderer {
         private target: HTMLElement;
 
         private rule: Rule;
-
         private canvas: Canvas;
+
+        public oneDimensionalAutomata: Automata.OneDimensional;
+        // public twoDimensionalAutomata: Automata.TwoDimensional;
+        private timer: number;
 
         public setRule (rule: Rule): void {
             this.rule = rule;
         }
 
-        public start (): void { }
-        public stop (): void { }
-        public reset (): void { }
-
-        public oneDimensionalAutomata: Automata.OneDimensional;
-        private timer: number;
-
         public startAutomata (): void {
-            window.clearTimeout(this.timer);
-            this.canvas.reset();
+            if (this.oneDimensionalAutomata) this.oneDimensionalAutomata.stop();
 
+            this.canvas.reset();
             this.canvas.setCellSize(1);
             let dataLength = this.canvas.setMaxDataWidth();
             this.canvas.setWidth(dataLength);
-            let limit = this.canvas.getHeight() - 1;
 
+            // prepare data
             let self = this;
             let rule = new Rule(this.rule.getDecimal());
-            this.oneDimensionalAutomata = new Automata.OneDimensional();
-            this.oneDimensionalAutomata.setRule(rule);
-            this.oneDimensionalAutomata.registerEventListener('new-generation', function (data: Automata.OneDimensionalData) {
-                self.canvas.drawBinaryLine(data.generation, data.data);
-                if (data.generation < limit) {
-                    self.timer = window.setTimeout(function () {
-                        self.oneDimensionalAutomata.nextGeneration();
-                    }, 0);
-                }
-            });
 
             let initialData = [];
             for (let i = 0; i < dataLength; i++) {
                 initialData.push(0);
             }
             initialData[Math.floor(initialData.length / 2)] = 1;
-            this.oneDimensionalAutomata.start(initialData.join(''));
+
+            // Automata
+            this.oneDimensionalAutomata = new Automata.OneDimensional();
+            this.oneDimensionalAutomata.setRule(rule);
+            this.oneDimensionalAutomata.registerEventListener('new-generation', function (data: Automata.OneDimensionalData) {
+                self.canvas.drawBinaryLine(data.generation, data.data);
+            });
+            this.oneDimensionalAutomata.start(initialData.join(''), this.canvas.getHeight() - 1);
         }
 
         public test (): void {
