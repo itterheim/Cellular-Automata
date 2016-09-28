@@ -9,19 +9,19 @@ var CA;
             }
             var rule = new CA.Rule(110);
             this.control = new CA.Controls.Control(this.target, rule);
-            this.canvas = new CA.Canvas(this.target, rule);
+            this.renderer = new CA.Renderer.Renderer(this.target, rule);
             var self = this;
             this.control.registerEventListener('rule-changed', function (rule) {
-                self.canvas.setRule(rule);
+                self.renderer.setRule(rule);
             });
             this.control.registerEventListener('start', function () {
-                self.canvas.start();
+                self.renderer.start();
             });
             this.control.registerEventListener('stop', function () {
-                self.canvas.stop();
+                self.renderer.stop();
             });
             this.control.registerEventListener('reset', function () {
-                self.canvas.reset();
+                self.renderer.reset();
             });
         }
         App.prototype.run = function () {
@@ -29,31 +29,6 @@ var CA;
         return App;
     }());
     CA.App = App;
-})(CA || (CA = {}));
-
-var CA;
-(function (CA) {
-    var Canvas = (function () {
-        function Canvas(parent, rule) {
-            this.rule = rule;
-            this.parent = parent;
-            this.target = document.createElement('div');
-            this.parent.appendChild(this.target);
-            this.target.id = 'ca-canvas';
-            this.canvas = document.createElement('canvas');
-            this.canvas.width = this.target.offsetWidth;
-            this.canvas.height = this.target.offsetHeight;
-            this.target.appendChild(this.canvas);
-        }
-        Canvas.prototype.setRule = function (rule) {
-            this.rule = rule;
-        };
-        Canvas.prototype.start = function () { };
-        Canvas.prototype.stop = function () { };
-        Canvas.prototype.reset = function () { };
-        return Canvas;
-    }());
-    CA.Canvas = Canvas;
 })(CA || (CA = {}));
 
 var CA;
@@ -375,4 +350,107 @@ var CA;
         }(CA.EventCreator));
         Controls.RunButton = RunButton;
     })(Controls = CA.Controls || (CA.Controls = {}));
+})(CA || (CA = {}));
+
+var CA;
+(function (CA) {
+    var Renderer;
+    (function (Renderer) {
+        var Canvas = (function () {
+            function Canvas(parent) {
+                this.cellSize = 10;
+                this.parent = parent;
+                this.canvas = document.createElement('canvas');
+                this.canvas.width = this.parent.offsetWidth;
+                this.canvas.height = this.parent.offsetHeight;
+                this.parent.appendChild(this.canvas);
+                this.context = this.canvas.getContext('2d');
+            }
+            Canvas.prototype.setCellSize = function (size) {
+                this.cellSize = size;
+            };
+            Canvas.prototype.getCellSize = function () {
+                return this.cellSize;
+            };
+            Canvas.prototype.drawBinaryCell = function (right, top, value) {
+                this.context.save();
+                this.context.fillStyle = value === '1' ? '#000' : '#fff';
+                this.context.fillRect(right, top, this.cellSize, this.cellSize);
+                this.context.restore();
+            };
+            Canvas.prototype.drawBinaryLine = function (line, binaryData) {
+                var top = line * this.cellSize;
+                for (var i = 0; i < binaryData.length; i++) {
+                    this.drawBinaryCell(i * this.cellSize, top, binaryData[i]);
+                }
+            };
+            Canvas.prototype.setWidth = function (width) {
+                this.canvas.width = width * this.cellSize;
+            };
+            Canvas.prototype.setPxWidth = function (width) {
+                this.canvas.width = width;
+            };
+            Canvas.prototype.setMaxDataWidth = function () {
+                var dataLength = Math.floor(this.parent.offsetWidth / this.cellSize);
+                this.canvas.width = dataLength * this.cellSize;
+                return dataLength;
+            };
+            Canvas.prototype.getWidth = function () {
+                return Math.floor(this.canvas.width / this.cellSize);
+            };
+            Canvas.prototype.getHeight = function () {
+                return Math.floor(this.canvas.height / this.cellSize);
+            };
+            Canvas.prototype.getPxWidth = function (width) {
+                return this.canvas.width;
+            };
+            Canvas.prototype.getPxHeight = function (width) {
+                return this.canvas.height;
+            };
+            Canvas.prototype.clear = function () {
+                this.context.save();
+                this.context.fillStyle = '#fff';
+                this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                this.context.restore();
+            };
+            return Canvas;
+        }());
+        Renderer.Canvas = Canvas;
+    })(Renderer = CA.Renderer || (CA.Renderer = {}));
+})(CA || (CA = {}));
+
+var CA;
+(function (CA) {
+    var Renderer;
+    (function (Renderer_1) {
+        var Renderer = (function () {
+            function Renderer(parent, rule) {
+                this.rule = rule;
+                this.parent = parent;
+                this.target = document.createElement('div');
+                this.parent.appendChild(this.target);
+                this.target.id = 'ca-renderer';
+                this.canvas = new Renderer_1.Canvas(this.target);
+                // test
+                this.canvas.setCellSize(1);
+                var dataLength = this.canvas.setMaxDataWidth();
+                var rows = this.canvas.getHeight();
+                for (var i = 0; i < rows; i++) {
+                    var binaryData = '';
+                    for (var j = 0; j < dataLength; j++) {
+                        binaryData += Math.floor(Math.random() * 2);
+                    }
+                    this.canvas.drawBinaryLine(i, binaryData);
+                }
+            }
+            Renderer.prototype.setRule = function (rule) {
+                this.rule = rule;
+            };
+            Renderer.prototype.start = function () { };
+            Renderer.prototype.stop = function () { };
+            Renderer.prototype.reset = function () { };
+            return Renderer;
+        }());
+        Renderer_1.Renderer = Renderer;
+    })(Renderer = CA.Renderer || (CA.Renderer = {}));
 })(CA || (CA = {}));

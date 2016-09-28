@@ -30,7 +30,7 @@ div#ca-control button:hover { background-color: #e2e2e2; }
 div#ca-control button.stopped:after { content: ''; position: absolute; top: 9px; left: 14px; border: 12px solid; border-color: transparent transparent transparent #777 }
 div#ca-control button.playing:after { content: ''; position: absolute; top: 12px; left: 12px; width: 16px; height: 16px; background-color: #777; }
 
-div#ca-canvas {
-    position: absolute; top: 80px; bottom: 20px; left: 20px; right: 20px; background: #fff; overflow: hidden;
+div#ca-renderer {
+    position: absolute; top: 80px; bottom: 20px; left: 20px; right: 20px; background: #fff; overflow: hidden; text-align: center;
     box-shadow: 0 0 2px -1px #000;
 }

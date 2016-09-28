@@ -2,7 +2,7 @@ namespace CA {
     export class App {
         private target: HTMLElement;
         private control: Controls.Control;
-        private canvas: Canvas;
+        private renderer: Renderer.Renderer;
 
         constructor (selector: string) {
             this.target = <HTMLElement> document.querySelector(selector);
@@ -13,20 +13,20 @@ namespace CA {
 
             let rule = new Rule(110);
             this.control =  new Controls.Control(this.target, rule);
-            this.canvas =  new Canvas(this.target, rule);
+            this.renderer =  new Renderer.Renderer(this.target, rule);
 
             let self = this;
             this.control.registerEventListener('rule-changed', function (rule: Rule) {
-                self.canvas.setRule(rule);
+                self.renderer.setRule(rule);
             });
             this.control.registerEventListener('start', function () {
-                self.canvas.start();
+                self.renderer.start();
             });
             this.control.registerEventListener('stop', function () {
-                self.canvas.stop();
+                self.renderer.stop();
             });
             this.control.registerEventListener('reset', function () {
-                self.canvas.reset();
+                self.renderer.reset();
             });
         }
 
