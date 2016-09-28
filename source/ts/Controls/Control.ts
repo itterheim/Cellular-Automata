@@ -30,7 +30,8 @@ namespace CA.Controls {
                 self.fireEvent('rule-changed', self.rule);
             });
             this.runButton.registerEventListener('*', function (action: string) {
-                console.debug(action);
+                if (action === 'play') self.fireEvent('start');
+                else console.debug(action);
             });
 
             this.binaryInput.setRule(this.rule);

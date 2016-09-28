@@ -31,9 +31,8 @@ namespace CA.Automata {
             let evolved = '';
 
             for (let i = 0; i < data.length; i++) {
-                // evolved += data[i] === '1' ? '0' : '1';
                 let value = this.getValue(data, i);
-                evolved += this.rule.isActive(value) ? '1' : '0'
+                evolved += this.rule.isActive(value) ? '1' : '0';
             }
             return evolved;
         }

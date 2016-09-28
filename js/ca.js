@@ -15,14 +15,14 @@ var CA;
                 self.renderer.setRule(rule);
             });
             this.control.registerEventListener('start', function () {
-                self.renderer.start();
+                self.renderer.startAutomata();
             });
-            this.control.registerEventListener('stop', function () {
-                self.renderer.stop();
-            });
-            this.control.registerEventListener('reset', function () {
-                self.renderer.reset();
-            });
+            // this.control.registerEventListener('stop', function () {
+            //     self.renderer.stop();
+            // });
+            // this.control.registerEventListener('reset', function () {
+            //     self.renderer.reset();
+            // });
         }
         App.prototype.run = function () {
         };
@@ -151,7 +151,6 @@ var CA;
             OneDimensional.prototype.evolve = function (data) {
                 var evolved = '';
                 for (var i = 0; i < data.length; i++) {
-                    // evolved += data[i] === '1' ? '0' : '1';
                     var value = this.getValue(data, i);
                     evolved += this.rule.isActive(value) ? '1' : '0';
                 }
@@ -335,7 +334,10 @@ var CA;
                     self.fireEvent('rule-changed', self.rule);
                 });
                 this.runButton.registerEventListener('*', function (action) {
-                    console.debug(action);
+                    if (action === 'play')
+                        self.fireEvent('start');
+                    else
+                        console.debug(action);
                 });
                 this.binaryInput.setRule(this.rule);
                 this.decimalInput.setRule(this.rule);
@@ -425,14 +427,13 @@ var CA;
                 this.parent.appendChild(this.target);
                 var self = this;
                 this.target.addEventListener('click', function () {
-                    if (self.state === 'stopped') {
-                        self.state = 'playing';
-                        self.fireEvent('play', 'play');
-                    }
-                    else {
-                        self.state = 'stopped';
-                        self.fireEvent('stop', 'stop');
-                    }
+                    // if (self.state === 'stopped') {
+                    //     self.state = 'playing';
+                    self.fireEvent('play', 'play');
+                    // } else {
+                    //     self.state = 'stopped';
+                    //     self.fireEvent('stop', 'stop');
+                    // }
                     self.target.className = self.state;
                 });
             }
@@ -580,7 +581,7 @@ var CA;
                 updateScollbarVisibility();
                 this.canvas.registerEventListener('canvas-size-changed', updateScollbarVisibility);
                 // this.test();
-                this.startAutomata();
+                // this.startAutomata();
             }
             Renderer.prototype.setRule = function (rule) {
                 this.rule = rule;
@@ -589,17 +590,20 @@ var CA;
             Renderer.prototype.stop = function () { };
             Renderer.prototype.reset = function () { };
             Renderer.prototype.startAutomata = function () {
+                window.clearTimeout(this.timer);
+                this.canvas.clear();
                 this.canvas.setCellSize(1);
                 // this.canvas.setWidth(9);
                 var dataLength = this.canvas.setMaxDataWidth();
                 var limit = this.canvas.getHeight() - 1;
                 var self = this;
+                var rule = new CA.Rule(this.rule.getDecimal());
                 this.oneDimensionalAutomata = new CA.Automata.OneDimensional();
-                this.oneDimensionalAutomata.setRule(this.rule);
+                this.oneDimensionalAutomata.setRule(rule);
                 this.oneDimensionalAutomata.registerEventListener('new-generation', function (data) {
                     self.canvas.drawBinaryLine(data.generation, data.data);
                     if (data.generation < limit) {
-                        window.setTimeout(function () {
+                        self.timer = window.setTimeout(function () {
                             self.oneDimensionalAutomata.nextGeneration();
                         }, 0);
                     }

@@ -14,13 +14,13 @@ namespace  CA.Controls {
 
             let self = this;
             this.target.addEventListener('click', function () {
-                if (self.state === 'stopped') {
-                    self.state = 'playing';
+                // if (self.state === 'stopped') {
+                //     self.state = 'playing';
                     self.fireEvent('play', 'play');
-                } else {
-                    self.state = 'stopped';
-                    self.fireEvent('stop', 'stop');
-                }
+                // } else {
+                //     self.state = 'stopped';
+                //     self.fireEvent('stop', 'stop');
+                // }
 
                 self.target.className = self.state;
             });
