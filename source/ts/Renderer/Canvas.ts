@@ -5,7 +5,7 @@ namespace CA.Renderer {
         private canvas: HTMLCanvasElement;
         private context: CanvasRenderingContext2D;
 
-        private cellSize: number = 10;
+        private cellSize: number = 1;
         private cellColor: string = '#04666b';
 
         private drawBinaryCell (right, top, value: string): void {

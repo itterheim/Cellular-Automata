@@ -53,6 +53,7 @@ namespace CA.Automata {
             return evolved;
         }
 
+        // get cell and its neightbours => binary value (110) => decimal value (6)
         private getValue (data: string, position: number): number {
             try {
                 let binary = `${this.getCharacter(data, position - 1)}${this.getCharacter(data, position)}${this.getCharacter(data, position + 1)}`;

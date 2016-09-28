@@ -7,25 +7,26 @@ namespace CA.Renderer {
         private canvas: Canvas;
 
         public oneDimensionalAutomata: Automata.OneDimensional;
-        // public twoDimensionalAutomata: Automata.TwoDimensional;
-        private timer: number;
+        // public twoDimensionalAutomata: Automata.TwoDimensional; // Future
 
         public setRule (rule: Rule): void {
             this.rule = rule;
         }
 
         public startAutomata (): void {
+            let self = this;
+
+            // stop execution of previous automata
             if (this.oneDimensionalAutomata) this.oneDimensionalAutomata.stop();
 
+            // reset canvas to last width and max visible height
             this.canvas.reset();
-            this.canvas.setCellSize(1);
+
+            // maximal visible width or user defined
             let dataLength = this.canvas.setMaxDataWidth();
             this.canvas.setWidth(dataLength);
 
             // prepare data
-            let self = this;
-            let rule = new Rule(this.rule.getDecimal());
-
             let initialData = [];
             for (let i = 0; i < dataLength; i++) {
                 initialData.push(0);
@@ -34,35 +35,11 @@ namespace CA.Renderer {
 
             // Automata
             this.oneDimensionalAutomata = new Automata.OneDimensional();
-            this.oneDimensionalAutomata.setRule(rule);
+            this.oneDimensionalAutomata.setRule(this.rule);
             this.oneDimensionalAutomata.registerEventListener('new-generation', function (data: Automata.OneDimensionalData) {
                 self.canvas.drawBinaryLine(data.generation, data.data);
             });
             this.oneDimensionalAutomata.start(initialData.join(''), this.canvas.getHeight() - 1);
-        }
-
-        public test (): void {
-            this.canvas.setCellSize(10);
-            let self = this;
-            let dataLength = this.canvas.setMaxDataWidth();
-            let i = 0;
-            let timer;
-
-            let createData = function () {
-                let binaryData = '';
-                for (let j = 0; j < dataLength; j++) {
-                    binaryData += Math.floor(Math.random() * 2);
-                }
-                self.canvas.drawBinaryLine(i, binaryData);
-
-                if (i * self.canvas.getCellSize() > self.target.offsetHeight * 1.2) {
-                    window.clearInterval(timer);
-                    return;
-                }
-
-                i++;
-            };
-            timer = window.setInterval(createData, 100);
         }
 
         constructor (parent: HTMLElement, rule: Rule) {
@@ -77,11 +54,11 @@ namespace CA.Renderer {
             let scrollHorizontal = document.createElement('div');
             scrollHorizontal.id = 'ca-scroll-horizontal';
             this.target.appendChild(scrollHorizontal);
-
             let scrollVertical = document.createElement('div');
             scrollVertical.id = 'ca-scroll-vertical';
             this.target.appendChild(scrollVertical);
 
+            // create canvas
             this.canvas = new Canvas(this.target);
 
             // scroll canvas
@@ -118,9 +95,6 @@ namespace CA.Renderer {
             };
             updateScollbarVisibility();
             this.canvas.registerEventListener('canvas-size-changed', updateScollbarVisibility);
-
-            // this.test();
-            // this.startAutomata();
         }
     }
 }

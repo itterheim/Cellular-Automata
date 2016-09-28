@@ -7,18 +7,16 @@ var CA;
                 console.error("CA: " + selector + " is not valid target;");
                 return;
             }
+        }
+        App.prototype.run = function () {
             var rule = new CA.Rule(110);
             this.control = new CA.Controls.Control(this.target, rule);
             this.renderer = new CA.Renderer.Renderer(this.target, rule);
             var self = this;
-            this.control.registerEventListener('rule-changed', function (rule) {
-                self.renderer.setRule(rule);
-            });
-            this.control.registerEventListener('start', function () {
+            this.control.registerEventListener('start', function (rule) {
+                self.renderer.setRule(new CA.Rule(rule.getDecimal()));
                 self.renderer.startAutomata();
             });
-        }
-        App.prototype.run = function () {
         };
         return App;
     }());
@@ -164,6 +162,7 @@ var CA;
                 }
                 return evolved;
             };
+            // get cell and its neightbours => binary value (110) => decimal value (6)
             OneDimensional.prototype.getValue = function (data, position) {
                 try {
                     var binary = "" + this.getCharacter(data, position - 1) + this.getCharacter(data, position) + this.getCharacter(data, position + 1);
@@ -324,12 +323,15 @@ var CA;
                 this.render();
             }
             Control.prototype.render = function () {
+                // wrapper
                 this.target = document.createElement('div');
                 this.target.id = 'ca-control';
                 this.parent.appendChild(this.target);
+                // create elemets
                 this.binaryInput = new Controls.BinaryInput(this.target);
                 this.decimalInput = new Controls.DecimalInput(this.target);
                 this.runButton = new Controls.RunButton(this.target);
+                // bindings
                 var self = this;
                 this.binaryInput.registerEventListener('rule-changed', function (rule) {
                     self.rule = rule;
@@ -342,8 +344,9 @@ var CA;
                     self.fireEvent('rule-changed', self.rule);
                 });
                 this.runButton.registerEventListener('click', function (action) {
-                    self.fireEvent('start');
+                    self.fireEvent('start', self.rule);
                 });
+                // set default rule
                 this.binaryInput.setRule(this.rule);
                 this.decimalInput.setRule(this.rule);
             };
@@ -452,7 +455,7 @@ var CA;
             __extends(Canvas, _super);
             function Canvas(parent) {
                 _super.call(this);
-                this.cellSize = 10;
+                this.cellSize = 1;
                 this.cellColor = '#04666b';
                 this.parent = parent;
                 this.canvas = document.createElement('canvas');
@@ -551,6 +554,7 @@ var CA;
                 var scrollVertical = document.createElement('div');
                 scrollVertical.id = 'ca-scroll-vertical';
                 this.target.appendChild(scrollVertical);
+                // create canvas
                 this.canvas = new Renderer_1.Canvas(this.target);
                 // scroll canvas
                 var self = this;
@@ -585,22 +589,22 @@ var CA;
                 };
                 updateScollbarVisibility();
                 this.canvas.registerEventListener('canvas-size-changed', updateScollbarVisibility);
-                // this.test();
-                // this.startAutomata();
             }
+            // public twoDimensionalAutomata: Automata.TwoDimensional; // Future
             Renderer.prototype.setRule = function (rule) {
                 this.rule = rule;
             };
             Renderer.prototype.startAutomata = function () {
+                var self = this;
+                // stop execution of previous automata
                 if (this.oneDimensionalAutomata)
                     this.oneDimensionalAutomata.stop();
+                // reset canvas to last width and max visible height
                 this.canvas.reset();
-                this.canvas.setCellSize(1);
+                // maximal visible width or user defined
                 var dataLength = this.canvas.setMaxDataWidth();
                 this.canvas.setWidth(dataLength);
                 // prepare data
-                var self = this;
-                var rule = new CA.Rule(this.rule.getDecimal());
                 var initialData = [];
                 for (var i = 0; i < dataLength; i++) {
                     initialData.push(0);
@@ -608,31 +612,11 @@ var CA;
                 initialData[Math.floor(initialData.length / 2)] = 1;
                 // Automata
                 this.oneDimensionalAutomata = new CA.Automata.OneDimensional();
-                this.oneDimensionalAutomata.setRule(rule);
+                this.oneDimensionalAutomata.setRule(this.rule);
                 this.oneDimensionalAutomata.registerEventListener('new-generation', function (data) {
                     self.canvas.drawBinaryLine(data.generation, data.data);
                 });
                 this.oneDimensionalAutomata.start(initialData.join(''), this.canvas.getHeight() - 1);
-            };
-            Renderer.prototype.test = function () {
-                this.canvas.setCellSize(10);
-                var self = this;
-                var dataLength = this.canvas.setMaxDataWidth();
-                var i = 0;
-                var timer;
-                var createData = function () {
-                    var binaryData = '';
-                    for (var j = 0; j < dataLength; j++) {
-                        binaryData += Math.floor(Math.random() * 2);
-                    }
-                    self.canvas.drawBinaryLine(i, binaryData);
-                    if (i * self.canvas.getCellSize() > self.target.offsetHeight * 1.2) {
-                        window.clearInterval(timer);
-                        return;
-                    }
-                    i++;
-                };
-                timer = window.setInterval(createData, 100);
             };
             return Renderer;
         }());

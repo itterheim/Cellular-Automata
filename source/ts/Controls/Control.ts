@@ -10,14 +10,17 @@ namespace CA.Controls {
         private runButton: RunButton;
 
         private render (): void {
+            // wrapper
             this.target = document.createElement('div');
             this.target.id = 'ca-control';
             this.parent.appendChild(this.target);
 
+            // create elemets
             this.binaryInput = new BinaryInput(this.target);
             this.decimalInput = new DecimalInput(this.target);
             this.runButton = new RunButton(this.target);
 
+            // bindings
             let self = this;
             this.binaryInput.registerEventListener('rule-changed', function (rule: Rule) {
                 self.rule = rule;
@@ -30,9 +33,10 @@ namespace CA.Controls {
                 self.fireEvent('rule-changed', self.rule);
             });
             this.runButton.registerEventListener('click', function (action: string) {
-                self.fireEvent('start');
+                self.fireEvent('start', self.rule);
             });
 
+            // set default rule
             this.binaryInput.setRule(this.rule);
             this.decimalInput.setRule(this.rule);
         }
