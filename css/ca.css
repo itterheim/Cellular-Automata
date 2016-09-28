@@ -22,6 +22,7 @@ div#ca-control {
 div#ca-control div.rule { width: 60px; height: 40px; border-right: 1px solid #ddd; overflow: hidden; float: left; display: block; cursor: pointer; }
 div#ca-control div.rule div.cell { width: 20px; height: 20px; display: block; float: left; background-color: #fff; }
 div#ca-control div.rule div.cell.active { background-color: #000; }
+div#ca-control div.rule div.cell.new.active { background-color: #04666b; }
 div#ca-control div.decimal { display: block; position: absolute; left: 488px; top: 0; right: 40px; bottom: 0; padding: 11px; }
 div#ca-control div.decimal input { display: inline-block; width: 60px; border: none; border-bottom: 1px solid #ddd; outline: none; padding: 2px; }
 div#ca-control div.decimal input:hover { border-bottom: 1px solid #3683da; }
