@@ -1,0 +1,36 @@
+* { font-family: 'Roboto', sans-serif; }
+body { padding: 0; margin: 0; }
+div#app {
+    position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: #000;
+
+    background-repeat: no-repeat;
+    background: #a1edd9;
+    background: -moz-linear-gradient(top, #a1edd9 0%, #3683da 100%, #3683da 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#a1edd9), color-stop(100%,#3683da), color-stop(100%,#3683da));
+    background: -webkit-linear-gradient(top, #a1edd9 0%,#3683da 100%,#3683da 100%);
+    background: -o-linear-gradient(top, #a1edd9 0%,#3683da 100%,#3683da 100%);
+    background: -ms-linear-gradient(top, #a1edd9 0%,#3683da 100%,#3683da 100%);
+    background: linear-gradient(to bottom, #a1edd9 0%,#3683da 100%,#3683da 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a1edd9', endColorstr='#3683da',GradientType=0 );
+    background-attachment: fixed;
+}
+
+div#ca-control {
+    position: absolute; top: 20px; height: 40px; left: 40px; right: 40px; background: #fff;
+    box-shadow: 0 0 2px -1px #000;
+}
+div#ca-control div.rule { width: 60px; height: 40px; border-right: 1px solid #ddd; overflow: hidden; float: left; display: block; cursor: pointer; }
+div#ca-control div.rule div.cell { width: 20px; height: 20px; display: block; float: left; background-color: #fff; }
+div#ca-control div.rule div.cell.active { background-color: #000; }
+div#ca-control div.decimal { display: block; position: absolute; left: 488px; top: 0; right: 40px; bottom: 0; padding: 11px; }
+div#ca-control div.decimal input { display: inline-block; width: 60px; border: none; border-bottom: 1px solid #ddd; outline: none; padding: 2px; }
+div#ca-control div.decimal input:hover { border-bottom: 1px solid #3683da; }
+div#ca-control button { position: absolute; right: 0; top: 0; bottom: 0; width: 40px; border: none; background-color: #ddd; outline: none; cursor: pointer; }
+div#ca-control button:hover { background-color: #e2e2e2; }
+div#ca-control button.stopped:after { content: ''; position: absolute; top: 9px; left: 14px; border: 12px solid; border-color: transparent transparent transparent #777 }
+div#ca-control button.playing:after { content: ''; position: absolute; top: 12px; left: 12px; width: 16px; height: 16px; background-color: #777; }
+
+div#ca-canvas {
+    position: absolute; top: 80px; bottom: 20px; left: 20px; right: 20px; background: #fff; overflow: hidden;
+    box-shadow: 0 0 2px -1px #000;
+}

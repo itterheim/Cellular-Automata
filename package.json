@@ -1,0 +1,29 @@
+{
+  "name": "Mides",
+  "version": "2.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/itterheim/desk.git"
+  },
+  "author": "Martin Itterheim",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/itterheim/desk/issues"
+  },
+  "homepage": "https://github.com/itterheim/desk",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-typescript": "^3.0.1",
+    "gulp-uglify": "^2.0.0",
+    "gulp-watch": "^4.3.9",
+    "run-sequence": "^1.2.2",
+    "typescript": "^2.0.3"
+  }
+}

@@ -1,0 +1,9 @@
+{
+    "compileOnSave": false,
+    "filesGlob" : [
+        "**/*.ts",
+        "**/*.tsx",
+        "!**/polyfills.ts",
+        "!node_modules/**"
+    ]
+}
