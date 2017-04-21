@@ -3,7 +3,7 @@
 Preview:
 https://itterheim.github.io/Cellular-Automata/
 
-## Examples
+## Some Examples
 
 ### Rule 30
 ![Rule 30](/examples/rule-30.png)
